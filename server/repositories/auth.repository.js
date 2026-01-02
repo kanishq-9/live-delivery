@@ -23,7 +23,7 @@ const checkUserInstanceInDB = async function(email){
     try {
         const result = await pool.query(
             `
-            SELECT email FROM users
+            SELECT id, email, password, role FROM users
                 WHERE email = $1
             `,
             [email]
@@ -34,5 +34,6 @@ const checkUserInstanceInDB = async function(email){
         throw new AppError("Some Error Occurred", 500);
     }
 }
+
 
 module.exports = { registerUserIntoDatabase , checkUserInstanceInDB }

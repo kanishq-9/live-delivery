@@ -1,5 +1,5 @@
 const logger = require("../config/logger");
-const { checkUserInstance } = require("../controllers/register.controller");
+const { checkUserInstance } = require("../controllers/auth.controller");
 const { AppError } = require("../middlewares/errorhandler");
 const { parsePhoneNumberFromString } = require('libphonenumber-js');
 

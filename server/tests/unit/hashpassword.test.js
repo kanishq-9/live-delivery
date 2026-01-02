@@ -1,4 +1,4 @@
-const { hashPassword } = require("../../validators/bcrypt.validator");
+const { hashPassword } = require("../../service/bcrypt.service");
 
 hashPassword
 test('should return hashedPassword', async() => {
