@@ -1,0 +1,52 @@
+# ========================
+# Dependencies
+# ========================
+node_modules/
+.pnp
+.pnp.js
+
+# ========================
+# Testing
+# ========================
+coverage/
+
+# ========================
+# Production build
+# ========================
+build/
+dist/
+
+# ========================
+# Environment variables
+# ========================
+.env
+.env.*
+!.env.example   # keep example file committed
+
+# ========================
+# Logs
+# ========================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ========================
+# OS / System
+# ========================
+.DS_Store
+Thumbs.db
+
+# ========================
+# Editor / IDE
+# ========================
+.vscode/
+.idea/
+
+# ========================
+# Runtime
+# ========================
+*.pid
+*.seed
+*.pid.lock
