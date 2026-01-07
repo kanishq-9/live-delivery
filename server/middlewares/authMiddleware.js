@@ -1,6 +1,7 @@
 const authvalidator = require("../validators/auth.validator");
 const { hashPassword } = require("../service/bcrypt.service");
 const { AppError } = require("./errorhandler");
+const { verifyToken } = require("../service/jwt.service");
 
 const authRegisterMiddleware = async function (req, res, next) {
   try {
@@ -63,4 +64,36 @@ const authLoginMiddleware = function (req, res, next) {
   }
 };
 
-module.exports = { authRegisterMiddleware, authLoginMiddleware };
+
+//JWT Validation
+const authUserCheckMiddleware = function (req , res, next){
+  try {
+    const authorization = req.headers.authorization;
+
+    if(!authorization){
+      throw new AppError("Authentication Required", 401);
+    }
+    if(!authorization.startsWith("Bearer ")){
+      throw new AppError("Invalid Authorization format",410);
+    }
+
+    const token = authorization.split(" ")[1];
+
+    if(!token){
+      throw new AppError("Authentication token missing",410);
+    }
+
+    //Verify
+    const user = verifyToken(token);
+    req.user = {
+      id : user.id,
+      role : user.role
+    }
+    
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+}
+
+module.exports = { authRegisterMiddleware, authLoginMiddleware, authUserCheckMiddleware };
