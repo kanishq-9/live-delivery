@@ -1,3 +1,5 @@
+const { pool } = require("../config/db");
+
 const historyInsertion = async function(client, orderId, status, updatedBy){
     try {
         await client.query(`
@@ -9,4 +11,20 @@ const historyInsertion = async function(client, orderId, status, updatedBy){
     }
 }
 
-module.exports = { historyInsertion }
+const findHistoryByOrderId = async function(orderId){
+    try {
+        const response = await pool.query(`
+            SELECT status, updated_at
+            FROM order_status_history
+            WHERE order_id = $1
+            ORDER BY updated_at ASC;
+            `,
+        [orderId]
+        );
+        return response.rows;
+    } catch (error) {
+        throw error;
+    }
+}
+
+module.exports = { historyInsertion, findHistoryByOrderId }

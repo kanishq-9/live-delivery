@@ -1,3 +1,4 @@
+const { pool } = require("../config/db");
 const { generateOrderCode } = require("../utils/generateOrderCode");
 
 const orderInsert = async function(client, userId, totalAmount, status="PLACED"){
@@ -17,4 +18,17 @@ const orderInsert = async function(client, userId, totalAmount, status="PLACED")
     }
 }
 
-module.exports = { orderInsert }
+const findByOrderCode = async function(orderCode){
+
+    const response = await pool.query(
+        `
+        SELECT id, user_id, order_code, status, total_amount, eta, created_at
+        FROM orders
+        WHERE order_code = $1;
+        `,
+        [orderCode]
+    );
+    return response.rows[0];
+}
+
+module.exports = { orderInsert, findByOrderCode }

@@ -1,3 +1,5 @@
+const { pool } = require("../config/db");
+
 const itemInsertMany = async function(client, productData, orderId){
 
     try {
@@ -17,4 +19,20 @@ const itemInsertMany = async function(client, productData, orderId){
 
 }
 
-module.exports = { itemInsertMany }
+const findItemByOrderId = async function( orderId ){
+    try {
+        const response = await pool.query(`
+            SELECT oi.product_id, p.name AS product_name, oi.quantity, oi.price_at_order_time
+	        FROM order_items oi
+	        JOIN products p ON p.id = oi.product_id
+            WHERE oi.order_id = $1;
+            `,
+        [orderId]
+        );
+        return response.rows;
+    } catch (error) {
+        throw error;
+    }
+}
+
+module.exports = { itemInsertMany, findItemByOrderId }

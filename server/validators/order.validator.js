@@ -44,4 +44,13 @@ const validateOrderAddress = function (deliveryAddress, next) {
   }
 };
 
-module.exports = { validateOrderIntent, validateOrderAddress };
+const validateOrderCode = function(req, res, next){
+  const { orderCode } = req.params;
+  const pattern = /^ORD-\d+-[A-Z0-9]+$/;
+  if(!pattern.test(orderCode)){
+    return next(new AppError("Invalid order code format", 400));
+  }
+  next();
+}
+
+module.exports = { validateOrderIntent, validateOrderAddress, validateOrderCode };

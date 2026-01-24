@@ -1,10 +1,10 @@
 const { pool } = require("../config/db");
 const logger = require("../config/logger");
 const { AppError } = require("../middlewares/errorhandler");
-const { insertAddress } = require("../repositories/address.repository");
-const { historyInsertion } = require("../repositories/history.repository");
-const { itemInsertMany } = require("../repositories/item.repository");
-const { orderInsert } = require("../repositories/order.repository");
+const { insertAddress, findAddressByOrderId } = require("../repositories/address.repository");
+const { historyInsertion, findHistoryByOrderId } = require("../repositories/history.repository");
+const { itemInsertMany, findItemByOrderId } = require("../repositories/item.repository");
+const { orderInsert, findByOrderCode } = require("../repositories/order.repository");
 const { findById } = require("../repositories/product.repository");
 
 const createOrder = async function (userId, items, address) {
@@ -58,4 +58,34 @@ const createOrder = async function (userId, items, address) {
   }
 };
 
-module.exports = { createOrder };
+const getByOrderCodeService = async ( orderCode, userId, role) =>{
+  const order = await findByOrderCode(orderCode);
+  if(!order) {
+    throw new AppError("Order not found", 404);
+  }
+
+  //Unauthorized should not get the view
+  if( role !== 'ADMIN' && order.user_id !== userId){
+    throw new AppError("Not Authorized to view this order", 403);
+  }
+
+  //If Authorized then fetch the required data
+  const address = await findAddressByOrderId(order.id);
+  const items = await findItemByOrderId(order.id);
+  const history = await findHistoryByOrderId(order.id);
+  
+
+  return {
+    orderCode : order.order_code,
+    status : order.status,
+    eta : order.eta,
+    totalAmount : order.total_amount,
+    createdAt : order.created_at,
+    address,
+    items,
+    history
+  }
+
+}
+
+module.exports = { createOrder , getByOrderCodeService };

@@ -1,3 +1,5 @@
+const { pool } = require("../config/db");
+
 const insertAddress = async function(client, orderId, address){
     try {
          await client.query(`
@@ -9,4 +11,19 @@ const insertAddress = async function(client, orderId, address){
     }
 }
 
-module.exports = { insertAddress }
+const findAddressByOrderId = async function( orderId ){
+    try {
+        const response = await pool.query(`
+            SELECT address, city, state, pincode
+            FROM order_address
+            WHERE order_id = $1;
+            `,
+        [orderId]
+        );
+        return response.rows[0];
+    } catch (error) {
+        throw error;
+    }
+}
+
+module.exports = { insertAddress, findAddressByOrderId }

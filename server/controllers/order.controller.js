@@ -1,5 +1,5 @@
 const logger = require('../config/logger');
-const { createOrder } = require('../service/order.service');
+const { createOrder, getByOrderCodeService } = require('../service/order.service');
 const { validateOrderIntent, validateOrderAddress } = require('../validators/order.validator');
 
 
@@ -16,7 +16,7 @@ const orderPostController = async(req, res, next) =>{
         
         return res.status(201).json({
         order_code,
-        total_amount,
+        total_amount:parseFloat(total_amount),
         created_at,
         status
     });
@@ -27,4 +27,19 @@ const orderPostController = async(req, res, next) =>{
     }
 }
 
-module.exports = { orderPostController };
+const getByOrderCodeController = async( req, res, next)=>{
+    try {
+        const order = await getByOrderCodeService(
+            req.params.orderCode,
+            req.user.id,
+            req.user.role
+        );
+        return res.status(200).json(order);
+    } catch (error) {
+        logger.error("Error while fetching for OrderCode", error);
+        return next(error);
+    }
+}
+
+
+module.exports = { orderPostController, getByOrderCodeController };
