@@ -1,11 +1,13 @@
 const { pool } = require("../config/db");
+const { getIO } = require('../config/socket');
 const logger = require("../config/logger");
 const { AppError } = require("../middlewares/errorhandler");
 const { insertAddress, findAddressByOrderId } = require("../repositories/address.repository");
 const { historyInsertion, findHistoryByOrderId } = require("../repositories/history.repository");
 const { itemInsertMany, findItemByOrderId } = require("../repositories/item.repository");
-const { orderInsert, findByOrderCode } = require("../repositories/order.repository");
+const { orderInsert, findByOrderCode, findAllByUserId, updateOrderStatus } = require("../repositories/order.repository");
 const { findById } = require("../repositories/product.repository");
+const { canTransition } = require("../utils/orderStatusCode");
 
 const createOrder = async function (userId, items, address) {
   const client = await pool.connect();
@@ -88,4 +90,69 @@ const getByOrderCodeService = async ( orderCode, userId, role) =>{
 
 }
 
-module.exports = { createOrder , getByOrderCodeService };
+const getMyOrdersService = async (userId) => {
+  const orders = await findAllByUserId(userId);
+
+  return orders.map(order => ({
+    orderCode : order.order_code,
+    status : order.status,
+    totalAmount : order.total_amount,
+    eta : order.eta,
+    createdAt : order.created_at
+  }));
+}
+
+const updateStatus = async (orderCode, newStatus, user) => {
+  const client = await pool.connect();
+  try {
+    client.query('BEGIN');
+
+    //fetch order
+    const orderRes = await findByOrderCode(orderCode);
+    if(!orderRes) throw new AppError("Order not found", 404);
+
+    //Only ADMIN can UPDATE
+    //BUG : Uncomment
+    /*if(user.role !== 'ADMIN'){
+      throw new AppError("Only Admin can update status", 403);
+    }*/
+
+    //validate transition
+    if(!canTransition(orderRes.status, newStatus)){
+      throw new AppError(`
+        Cannot change status from ${orderRes.status} to ${newStatus}
+        `,
+      400);
+    }
+
+    //Update orders table
+    await updateOrderStatus(client, newStatus, orderRes.id);
+
+    //Insert history
+    await historyInsertion(client, orderRes.id, newStatus, user.id);
+
+    await client.query('COMMIT');
+
+    //socket emit
+    const io = getIO();
+    io.to(orderCode).emit("order_status_updated",{
+      orderCode,
+      newStatus
+    })
+
+    return {
+      orderCode,
+      oldStatus : orderRes.status,
+      newStatus
+    }
+
+  } catch (error) {
+    await client.query("ROLLBACK");
+    logger.error("Error While Updating Status", error);
+    throw new AppError(error.message?error.message:"Error while Updating Status", 500);
+  }finally{
+    client.release();
+  }
+}
+
+module.exports = { createOrder , getByOrderCodeService, getMyOrdersService, updateStatus };

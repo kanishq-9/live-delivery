@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket Test</title>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
+</head>
+<body>
+    <h2>Socket Test</h2>
+    <script>
+        const socket = io(`http://localhost:8080`, {
+            auth: {
+                token : `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkODg3MDg4LTYwZTQtNGYxOS1hZWQ1LThjMGQ4NmU5NDlhNyIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzY5NDQ4ODg4LCJleHAiOjE3Njk1MzUyODh9.hMnmfRs_1_q-YjhRYNj0gdGLLyRX-vgW2UNAzrYNllo`
+            }
+        });
+        socket.on("connect", ()=>{
+            console.log(`Connected:`,socket.id);
+
+            socket.emit('join_order_room', `ORD-20260126183151964-B17AD7`);
+            
+        });
+        socket.on("order_status_updated", (data)=>{
+            console.log(`Status Updated, ${data}`);
+            alert(`newStatus:${data.newStatus}`)
+            
+        })
+    </script>
+</body>
+</html>

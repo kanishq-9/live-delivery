@@ -31,4 +31,30 @@ const findByOrderCode = async function(orderCode){
     return response.rows[0];
 }
 
-module.exports = { orderInsert, findByOrderCode }
+const findAllByUserId = async (userId) => {
+    const response = await pool.query(
+        `
+        SELECT order_code, status, total_amount, eta, created_at
+        FROM orders
+        WHERE user_id = $1
+        ORDER BY created_at DESC;
+        `,
+        [userId]
+    );
+    return response.rows;
+}
+
+const updateOrderStatus = async(client, newStatus, id)=>{
+    try {
+        await client.query(`
+            UPDATE orders SET status = $1, updated_at = NOW()
+                WHERE id = $2;
+            `,
+        [newStatus, id]);
+        
+    } catch (error) {
+        throw error;
+    }
+}
+
+module.exports = { orderInsert, findByOrderCode, findAllByUserId, updateOrderStatus }
