@@ -1,6 +1,7 @@
 const { AppError } = require("../middlewares/errorhandler");
 const { verifyToken } = require("../service/jwt.service");
 const { getByOrderCodeService } = require("../service/order.service");
+const { canAccessOrder } = require("../service/orderauth.service");
 
 function initOrderSocket(io){
     io.use((socket, next)=>{
@@ -21,10 +22,9 @@ function initOrderSocket(io){
         console.log("...Client connected...", socket.user.id);
 
         socket.on("join_order_room", async (orderCode) =>{
-            const order = await getByOrderCodeService(orderCode, socket.user.id, socket.user.role);
-            if(order){
+            const allowed = await canAccessOrder( orderCode, socket.user );
+            if(allowed){
                 socket.join(orderCode);
-                console.log(`Socket joined room: ${orderCode}`)
             }else{
                 throw new AppError("Unauthorized room join attempt!");
             }   

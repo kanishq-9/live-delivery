@@ -11,13 +11,13 @@
     <script>
         const socket = io(`http://localhost:8080`, {
             auth: {
-                token : `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkODg3MDg4LTYwZTQtNGYxOS1hZWQ1LThjMGQ4NmU5NDlhNyIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzY5NDQ4ODg4LCJleHAiOjE3Njk1MzUyODh9.hMnmfRs_1_q-YjhRYNj0gdGLLyRX-vgW2UNAzrYNllo`
+                token : `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkODg3MDg4LTYwZTQtNGYxOS1hZWQ1LThjMGQ4NmU5NDlhNyIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzY5NzA2OTE1LCJleHAiOjE3Njk3OTMzMTV9.zGALdEVXnhfOeafFUuODllRlyCF6vw-R52D65ZSj7Hc`
             }
         });
         socket.on("connect", ()=>{
             console.log(`Connected:`,socket.id);
 
-            socket.emit('join_order_room', `ORD-20260126183151964-B17AD7`);
+            socket.emit('join_order_room', `ORD-20260130035233327-B17AD7`);
             
         });
         socket.on("order_status_updated", (data)=>{

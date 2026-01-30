@@ -4,6 +4,7 @@ const {
   getByOrderCodeService,
   getMyOrdersService,
   updateStatus,
+  assignDeliveryService,
 } = require("../service/order.service");
 const {
   validateOrderIntent,
@@ -17,7 +18,6 @@ const orderPostController = async (req, res, next) => {
       req.body.deliveryAddress,
       next,
     );
-    console.log(items, deliveryAddress);
 
     //Order Creation
     const { order_code, status, total_amount, created_at } = await createOrder(
@@ -54,7 +54,10 @@ const getByOrderCodeController = async (req, res, next) => {
 
 const getMyOrdersController = async (req, res, next) => {
   try {
-    const orders = await getMyOrdersService(req.user.id);
+    const { page, limit, status} = req.pagination;
+    console.log(page, limit, status);
+    
+    const orders = await getMyOrdersService(req.user.id, page, limit, status);
     return res.status(200).json(orders);
   } catch (error) {
     next(error);
@@ -74,9 +77,23 @@ const updateOrderStatus = async (req, res, next) => {
   }
 };
 
+const assignDeliveryController = async (req, res, next) => {
+  try {
+    const result = await assignDeliveryService(
+      req.params.orderCode,
+      req.body.deliveryAgentId
+    );
+    return res.status(200).json(result);
+    
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   orderPostController,
   getByOrderCodeController,
   getMyOrdersController,
   updateOrderStatus,
+  assignDeliveryController
 };

@@ -10,6 +10,7 @@ const registerUserIntoDatabase = async function(email, password, name, role='USE
                 VALUES ($1, $2, $3, $4, $5)
                 RETURNING name, email, phone;
             `,
+            //BUG CHANGE ROLE TO BE ONLY USER
             [name, email, password, role, phone]
         );
         return result.rows[0];
@@ -35,5 +36,21 @@ const checkUserInstanceInDB = async function(email){
     }
 }
 
+const findByUserId = async function(userId){
+    try {
+        const result = await pool.query(
+            `
+            SELECT id, email, password, role FROM users
+                WHERE id = $1
+            `,
+            [userId]
+        );
+        return result.rows[0];
+    } catch (error) {
+        logger.error(`${error.message}`);
+        throw new AppError("Some Error Occurred", 500);
+    }
+}
 
-module.exports = { registerUserIntoDatabase , checkUserInstanceInDB }
+
+module.exports = { registerUserIntoDatabase , checkUserInstanceInDB , findByUserId };

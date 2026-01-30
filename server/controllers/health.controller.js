@@ -6,7 +6,7 @@ const healthController = async(req, res, next)=>{
     try{
         //Check if DB is connected
         await pool.query('SELECT 1');
-        res.json({ status : "READY" });
+        return res.json({ status : "READY" });
     }catch(error){
         logger.error("Database not ready")
         next(new AppError("Database not ready", 503));

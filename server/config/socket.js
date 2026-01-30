@@ -8,7 +8,7 @@ function setIO(io){
 
 function getIO(){
     if(!ioInstance){
-        throw new Error("Socket.io not initialized!");
+        throw new AppError("Socket.io not initialized!", 400);
     }
     return ioInstance;
 }
